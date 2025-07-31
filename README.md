@@ -33,7 +33,7 @@ npm (comes with Node.js) or Yarn
 A modern web browser (e.g., Chrome, Firefox)
 
 Clone the Repository
-git clone https://github.com/your-username/themeapp.git
+git clone https://github.com/ahn07/Aahan-Solanki-React-Developer.git
 cd themeapp
 
 
