@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-
 interface ThemeColors {
   primary: string;
   secondary: string;
@@ -53,6 +52,7 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [currentTheme, setCurrentTheme] = useState<string>("theme1");
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("selectedTheme");
@@ -64,6 +64,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const switchTheme = (theme: string): void => {
     setCurrentTheme(theme);
     localStorage.setItem("selectedTheme", theme);
+    setIsSidebarOpen(false); // Close sidebar on theme switch
+  };
+
+  const toggleSidebar = (): void => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   const themes: Record<string, Theme> = {
@@ -139,8 +144,57 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   return (
     <ThemeContext.Provider value={{ currentTheme, switchTheme, theme, themes }}>
-      <div className={`${theme.colors.text} ${theme.fonts.primary} transition-all duration-500`}>
-        {children}
+      <div className={`${theme.colors.text} ${theme.fonts.primary} transition-all duration-500 min-h-screen flex`}>
+        {theme.layout === "sidebar" && (
+          <>
+            {/* Sidebar */}
+            <aside
+              className={`fixed inset-y-0 left-0 z-50 w-64 ${theme.colors.secondary} transform ${
+                isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+              } transition-transform duration-300 ease-in-out md:translate-x-0 ${theme.colors.border} border-r`}
+            >
+              <div className="p-6">
+                <h2 className={`text-2xl ${theme.fonts.heading} ${theme.colors.text} mb-6`}>Navigation</h2>
+                <nav className="space-y-4">
+                  <a href="#" className={`${theme.colors.textSecondary} hover:${theme.colors.accent} block`}>
+                    Home
+                  </a>
+                  <a href="#" className={`${theme.colors.textSecondary} hover:${theme.colors.accent} block`}>
+                    Products
+                  </a>
+                  <a href="#" className={`${theme.colors.textSecondary} hover:${theme.colors.accent} block`}>
+                    About
+                  </a>
+                  <a href="#" className={`${theme.colors.textSecondary} hover:${theme.colors.accent} block`}>
+                    Contact
+                  </a>
+                </nav>
+              </div>
+            </aside>
+            {/* Mobile Sidebar Toggle */}
+            <button
+              className={`md:hidden fixed top-4 left-4 z-50 ${theme.colors.accent} text-white p-2 rounded-lg`}
+              onClick={toggleSidebar}
+              aria-label="Toggle Sidebar"
+            >
+              {isSidebarOpen ? "✕" : "☰"}
+            </button>
+            {/* Overlay for mobile when sidebar is open */}
+            {isSidebarOpen && (
+              <div
+                className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+                onClick={toggleSidebar}
+                aria-hidden="true"
+              />
+            )}
+          </>
+        )}
+        {/* Main Content */}
+        <main
+          className={`flex-1 ${theme.layout === "sidebar" ? "md:ml-64" : ""} ${theme.colors.primary} transition-all duration-500`}
+        >
+          {children}
+        </main>
       </div>
     </ThemeContext.Provider>
   );
